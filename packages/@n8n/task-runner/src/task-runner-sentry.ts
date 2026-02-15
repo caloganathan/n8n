@@ -23,7 +23,7 @@ export class TaskRunnerSentry {
 		await this.errorReporter.init({
 			serverType: 'task_runner',
 			dsn,
-			release: `n8n@${n8nVersion}`,
+			release: `n8n@${this.normalizeReleaseVersion(n8nVersion)}`,
 			environment,
 			serverName: deploymentName,
 			beforeSendFilter: this.filterOutUserCodeErrors,
@@ -34,6 +34,13 @@ export class TaskRunnerSentry {
 				Http: true,
 			},
 		});
+	}
+
+	private normalizeReleaseVersion(version: string) {
+		const firstLine = version.split(/\r?\n/, 1)[0]?.trim() ?? '';
+		const firstToken = firstLine.split(/\s+/, 1)[0]?.trim();
+
+		return firstToken || 'unknown';
 	}
 
 	async shutdown() {
