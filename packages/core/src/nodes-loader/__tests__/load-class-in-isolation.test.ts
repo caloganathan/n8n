@@ -56,4 +56,27 @@ describe('loadClassInIsolation', () => {
 
 		expect(() => loadClassInIsolation(filePath, className)).toThrow('Script execution failed');
 	});
+
+	it('should fall back to direct require when vm throws a TypeError', () => {
+		runInContext.mockImplementationOnce(() => {
+			throw new TypeError('require is not a function');
+		});
+
+		jest.doMock(
+			filePath,
+			() => ({
+				TestClass: class {
+					getValue() {
+						return 'fallback value';
+					}
+				},
+			}),
+			{ virtual: true },
+		);
+
+		const instance = loadClassInIsolation<{ getValue(): string }>(filePath, className);
+		expect(instance.getValue()).toBe('fallback value');
+
+		jest.dontMock(filePath);
+	});
 });
