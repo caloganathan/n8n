@@ -295,6 +295,25 @@ describe('TaskRunnerSentry', () => {
 				},
 			});
 		});
+
+		it('should normalize multiline versions before sending to Sentry', async () => {
+			const sentry = new TaskRunnerSentry(
+				{
+					...commonConfig,
+					dsn: 'https://sentry.io/123',
+					n8nVersion: '619a11b\nfix: Bumping up package versions (#25750)',
+				},
+				mockErrorReporter,
+			);
+
+			await sentry.initIfEnabled();
+
+			expect(mockErrorReporter.init).toHaveBeenCalledWith(
+				expect.objectContaining({
+					release: 'n8n@619a11b',
+				}),
+			);
+		});
 	});
 
 	describe('shutdown', () => {
